@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#0b76d1"><meta name="description" content="Find nearby tyre air pressure, puncture repair and fuel stations with AIRGO.">
+  <title>AIRGO — Find tyre services nearby</title>
+  <link rel="manifest" href="/manifest.webmanifest"><link rel="icon" href="/assets/icon-192.png">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<header class="topbar">
+  <a class="brand" href="#"><span class="brand-mark">A</span><span>AIRGO<small>Find Air. Fix Tyres. Keep Moving.</small></span></a>
+  <nav><button class="nav-link" id="installBtn" hidden>Install app</button><button class="nav-link" id="accountBtn">Business / Admin</button></nav>
+</header>
+<main>
+  <section class="hero">
+    <div class="hero-copy"><span class="eyebrow">YOUR ROADside TYRE-SERVICE FINDER</span>
+      <h1>Tyre trouble?<br><em>Find help nearby.</em></h1>
+      <p>Discover air-pressure points, petrol pumps and puncture repair shops around you in seconds.</p>
+      <button class="primary-btn" id="locateBtn"><span>◎</span> Find services near me</button>
+      <p class="location-status" id="locationStatus">Allow location access to see nearby places.</p>
+    </div>
+    <div class="hero-art"><div class="circle circle-one"></div><div class="circle circle-two"></div><div class="road-icon">◉</div><div class="hero-label">AIRGO<br><small>ON YOUR WAY</small></div></div>
+  </section>
+  <section class="search-panel">
+    <div class="search-row"><label class="search-box"><span>⌕</span><input id="searchInput" placeholder="Search by shop name or area"></label><button class="outline-btn" id="resetBtn">Reset</button></div>
+    <div class="filters">
+      <label><input type="checkbox" class="service-filter" value="air" checked> <span>Air pressure</span></label>
+      <label><input type="checkbox" class="service-filter" value="puncture" checked> <span>Puncture repair</span></label>
+      <label><input type="checkbox" class="service-filter" value="fuel" checked> <span>Petrol pump</span></label>
+      <label><input type="checkbox" id="openNow"> <span>Open now</span></label>
+      <label class="rating-filter">Rating <select id="minRating"><option value="0">Any</option><option value="3">3+ stars</option><option value="4">4+ stars</option></select></label>
+    </div>
+  </section>
+  <section class="results-layout">
+    <div class="results-column">
+      <div class="section-heading"><div><span class="eyebrow">NEAR YOUR LOCATION</span><h2>Nearby services <span id="resultCount" class="count">0</span></h2></div><select id="sortBy" class="sort-select"><option value="distance">Nearest first</option><option value="rating">Top rated</option></select></div>
+      <div id="serviceList" class="service-list"><div class="empty-state">Connect to the internet to load approved service locations.</div></div>
+    </div>
+    <div class="map-column"><div id="map" aria-label="Map of nearby tyre services"></div><div class="map-note">Map data © OpenStreetMap contributors</div></div>
+  </section>
+  <section class="add-cta"><div><span class="eyebrow">OWN A GARAGE OR FUEL STATION?</span><h2>Get discovered by drivers.</h2><p>Submit your business details to AIRGO. Listings go live after admin verification.</p></div><button class="primary-btn" id="registerCta">Register your business</button></section>
+</main>
+<footer><strong>AIRGO</strong><span>Helping drivers find tyre services across Chhatrapati Sambhajinagar.</span><span>© <span id="year"></span> AIRGO</span></footer>
+
+<div class="modal-backdrop" id="authModal" hidden>
+ <section class="modal">
+  <button class="close-btn" data-close="authModal">×</button>
+  <div id="authView">
+   <span class="eyebrow">BUSINESS PORTAL</span><h2 id="authTitle">Business owner sign in</h2>
+   <p class="muted">Register or sign in to submit your business for approval.</p>
+   <form id="authForm"><label>Email address<input id="authEmail" type="email" required placeholder="you@example.com"></label><label>Password<input id="authPassword" type="password" minlength="6" required placeholder="At least 6 characters"></label><label id="ownerNameWrap" hidden>Owner / business contact name<input id="ownerName" placeholder="Your name"></label><button class="primary-btn full" id="authSubmit">Sign in</button></form>
+   <p class="switch-line"><span id="switchText">New to AIRGO?</span> <button class="text-btn" id="switchAuth">Create account</button></p>
+   <p class="form-message" id="authMessage"></p>
+  </div>
+  <div id="ownerView" hidden>
+   <span class="eyebrow">BUSINESS SUBMISSION</span><h2>Submit your business</h2><p class="muted">Your submission is private until approved by AIRGO admin.</p>
+   <form id="requestForm">
+    <label>Business name<input id="bizName" required maxlength="100"></label>
+    <label>Contact phone<input id="bizPhone" required type="tel" maxlength="20"></label>
+    <label>Area / address<input id="bizAddress" required maxlength="250" placeholder="e.g. CIDCO, Chhatrapati Sambhajinagar"></label>
+    <label>Services offered</label><div class="check-grid"><label><input type="checkbox" name="ownerService" value="air"> Air pressure</label><label><input type="checkbox" name="ownerService" value="puncture"> Puncture repair</label><label><input type="checkbox" name="ownerService" value="fuel"> Petrol pump</label></div>
+    <label>Opening time<input id="openTime" type="time" value="08:00" required></label><label>Closing time<input id="closeTime" type="time" value="21:00" required></label>
+    <label>Business location coordinates</label>
+    <div class="two-col"><label>Latitude<input id="ownerLat" type="number" step="any" required placeholder="19.8762"></label><label>Longitude<input id="ownerLng" type="number" step="any" required placeholder="75.3433"></label></div>
+    <button type="button" class="outline-btn" id="ownerLocateBtn">Use this device's location</button>
+    <label>Google Maps link (optional)<input id="mapLink" type="url" placeholder="https://maps.google.com/..."></label>
+    <button class="primary-btn full">Send for admin review</button>
+   </form><p class="form-message" id="requestMessage"></p><button class="text-btn" id="signOutBtn">Sign out</button>
+  </div>
+  <div id="adminView" hidden>
+   <span class="eyebrow">ADMIN CONTROL</span><h2>Business submissions</h2><p class="muted">Review submissions and publish verified listings.</p>
+   <div id="adminRequests" class="admin-requests">Loading…</div>
+   <h3>Add approved business manually</h3>
+   <form id="adminAddForm">
+    <label>Business name<input id="adminBizName" required></label><label>Phone<input id="adminBizPhone" required></label><label>Address<input id="adminBizAddress" required></label>
+    <div class="two-col"><label>Latitude<input id="adminLat" type="number" step="any" required></label><label>Longitude<input id="adminLng" type="number" step="any" required></label></div>
+    <label>Services</label><div class="check-grid"><label><input type="checkbox" name="adminService" value="air"> Air</label><label><input type="checkbox" name="adminService" value="puncture"> Puncture</label><label><input type="checkbox" name="adminService" value="fuel"> Fuel</label></div>
+    <div class="two-col"><label>Opens<input id="adminOpen" type="time" value="08:00"></label><label>Closes<input id="adminClose" type="time" value="21:00"></label></div>
+    <button class="primary-btn full">Add approved listing</button>
+   </form><p class="form-message" id="adminMessage"></p><button class="text-btn" id="adminSignOut">Sign out</button>
+  </div>
+ </section>
+</div>
+<div class="toast" id="toast" role="status"></div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/config.js"></script><script src="/app.js"></script>
+</body></html>
